@@ -1,4 +1,4 @@
-module bubblex
+module github.com/alexj212/bubblex
 
 go 1.18
 
