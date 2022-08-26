@@ -1,0 +1,7 @@
+bin
+vendor
+go.work
+go.work.sum
+go.sum
+.idea
+go.sum
