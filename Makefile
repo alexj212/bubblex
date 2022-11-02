@@ -19,7 +19,7 @@ export GIT_REPO := $(shell git config --get remote.origin.url  2> /dev/null)
 export COMMIT_DATE := $(shell git log -1 --format=%cd  2> /dev/null)
 
 export BUILT_BY := $(shell whoami  2> /dev/null)
-export VERSION=v0.0.2
+export VERSION=v0.0.3
 
 
 ifeq ($(BRANCH),)
