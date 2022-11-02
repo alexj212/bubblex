@@ -10,20 +10,23 @@ func NewApp(c *TuiClient) *Ui {
     return NewUi(c)
 }
 
-func NewTuiClient() *TuiClient {
+func NewTuiClient(outputHandler func(data []byte), inputHandler func(input string)) *TuiClient {
     console := &TuiClient{}
     console.m = NewUi(console)
-
+    console.m.LogViewer.OnCommandEntered = inputHandler
+    console.outputHandler = outputHandler
     console.p = tea.NewProgram(console.m, tea.WithAltScreen())
     RegisterClient(console.p)
     return console
 }
 
 type TuiClient struct {
-    p    *tea.Program
-    s    ssh.Session
-    m    *Ui
-    user *sshUser
+    p             *tea.Program
+    s             ssh.Session
+    m             *Ui
+    user          *sshUser
+    outputHandler func(data []byte)
+    inputHandler  func(data []byte)
 }
 
 //Close interface func implementation to close client down
@@ -59,13 +62,19 @@ func (s *TuiClient) History() []string {
 //Write interface func implementation to write to clients stream
 func (s *TuiClient) Write(p []byte) (n int, err error) {
     s.AddReplContent(string(p))
+    if s.outputHandler != nil {
+        s.outputHandler(p)
+    }
+
     return len(p), nil
 }
 
 //WriteString interface func implementation to write string to clients stream
 func (s *TuiClient) WriteString(p string) {
     s.AddReplContent(p)
-
+    if s.outputHandler != nil {
+        s.outputHandler([]byte(p))
+    }
 }
 
 func (s *TuiClient) AddReplContent(line string) {

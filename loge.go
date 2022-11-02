@@ -37,7 +37,7 @@ func LogeInit() func() {
 func AppendEvent(event *LogEvent) {
 
     row := table.NewRow(table.RowData{ //current_time.Format(time.RubyDate))
-        columnKeyTime:    fmt.Sprintf("%s", event.Timestamp.Format(time.RubyDate)),
+        columnKeyTime:    fmt.Sprintf("%s", event.Timestamp.Local().Format("15:04:05.000 EST")),
         columnKeyLevel:   table.NewStyledCell(Name(event.Level), lipgloss.NewStyle().Foreground(lipgloss.Color(Color(event.Level)))),
         columnKeyMessage: event.Message,
         // This isn't a visible column, but we can add the data here anyway for later retrieval
@@ -63,12 +63,25 @@ func (m *logeHandler) WriteOutTransaction(tr *loge.Transaction) {
     */
 
     for i, mesg := range tr.Items {
-        line := mesg.Message
+
+        //if strings.Contains(mesg.Message, "\n") {
+        //    mesg.Message = fmt.Sprintf("@@ %d[%s]", len(mesg.Message), mesg.Message)
+        //}
+        //if strings.Contains(mesg.Message, "SetDeviceId") {
+        //    mesg.Message = fmt.Sprintf("@@ SetDeviceId [%s]", mesg.Message[0:len(mesg.Message)-5])
+        //}
+        //if strings.Contains(mesg.Message, "ClientControl3") {
+        //    mesg.Message = fmt.Sprintf("@@ ClientControl3 [%s]", mesg.Message[0:len(mesg.Message)-5])
+        //}
+
+        //if len(mesg.Message) > 20 {
+        //    mesg.Message = mesg.Message[0:20]
+        //}
 
         event := &LogEvent{
             EventID:   fmt.Sprintf("%v:%d", tr.ID, i),
             Level:     mesg.Level,
-            Message:   line,
+            Message:   mesg.Message,
             Source:    "loge",
             Timestamp: mesg.Timestamp,
             Data:      mesg.Data,

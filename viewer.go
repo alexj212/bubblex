@@ -25,11 +25,12 @@ func init() {
 }
 
 type LogViewer struct {
-    logTable    table.Model
-    textInput   TextInput
-    totalWidth  int
-    totalHeight int
-    statusbar   *statusbar.Bubble
+    logTable         table.Model
+    textInput        TextInput
+    totalWidth       int
+    totalHeight      int
+    statusbar        *statusbar.Bubble
+    OnCommandEntered func(string)
 }
 
 func NewLogViewer() *LogViewer { // tea.Model
@@ -65,7 +66,7 @@ func NewLogViewer() *LogViewer { // tea.Model
         logTable: table.New([]table.Column{
             table.NewColumn(columnKeyTime, "Time", 30).WithStyle(lipgloss.NewStyle().Align(lipgloss.Left)),
             table.NewColumn(columnKeyLevel, "Level", 10).WithStyle(lipgloss.NewStyle().Align(lipgloss.Left)),
-            table.NewFlexColumn(columnKeyMessage, ":( %", 1).WithStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("#c88"))).WithStyle(lipgloss.NewStyle().Align(lipgloss.Left)),
+            table.NewFlexColumn(columnKeyMessage, "", 1).WithStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("#c88"))).WithStyle(lipgloss.NewStyle().Align(lipgloss.Left)),
         }).WithRows(rows).
             Border(emptyBorder).
             WithBaseStyle(styleBase).
@@ -108,7 +109,9 @@ func (m *LogViewer) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
         case tea.KeyEnd:
             m.textInput.CursorEnd()
         case tea.KeyEnter:
-            loge.Info("Entered cmd: %v", m.textInput.Value())
+            if m.OnCommandEntered != nil {
+                m.OnCommandEntered(m.textInput.Value())
+            }
             m.textInput.SetValue("")
 
         case tea.KeyEscape, tea.KeyCtrlC, tea.KeyCtrlQ:
@@ -183,6 +186,6 @@ func Name(l uint32) string {
     case loge.LogLevelError:
         return "error"
     default:
-        return "unknown"
+        return ""
     }
 }

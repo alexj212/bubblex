@@ -33,7 +33,7 @@ type SshService interface {
     // Spawn start new go routine serving ssh
     Spawn()
     // RegisterUser register a user on the system
-    RegisterUser(user string, level commandr.ExecLevel, keys []string, history []string)
+    RegisterUser(user string, level commandr.ExecLevel, keys []*gox.SshKey, history []string)
     // LookupUser lookup a user by name
     LookupUser(username string) (user *sshUser, ok bool)
     // AddCommand add commands to be executed
@@ -198,7 +198,7 @@ func (svc *sshService) LookupUser(username string) (user *sshUser, ok bool) {
 }
 
 // RegisterUser register a user on the system
-func (svc *sshService) RegisterUser(user string, level commandr.ExecLevel, keys []string, history []string) {
+func (svc *sshService) RegisterUser(user string, level commandr.ExecLevel, keys []*gox.SshKey, history []string) {
 
     u := &sshUser{
         name:    user,
@@ -212,7 +212,7 @@ func (svc *sshService) RegisterUser(user string, level commandr.ExecLevel, keys 
     }
 
     for _, v := range keys {
-        u.keys[v] = true
+        u.keys[string(v.Key)] = true
     }
     svc.users[user] = u
 }
@@ -284,7 +284,7 @@ func WithHostKey(hostKey gossh.Signer) ssh.Option {
     }
 }
 
-func CreatesSshService(port int) (SshService, []string, error) {
+func CreatesSshService(port int) (SshService, []*gox.SshKey, error) {
 
     usr, _ := user.Current()
     sshCertDir := filepath.Join(usr.HomeDir, ".ssh")

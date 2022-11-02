@@ -1,17 +1,10 @@
 package main
 
 import (
-    "fmt"
     "github.com/alexj212/gox/commandr"
     "github.com/fatih/color"
-    spin "github.com/tj/go-spin"
     "strings"
-    "time"
 )
-
-// "github.com/tj/go-spin"
-
-var TldrCmd = &commandr.Command{Use: "tldr", Exec: tldrCmd, Short: "echo input", ExecLevel: commandr.All}
 
 var ExitCommand = &commandr.Command{Use: "exit", Exec: exitCmd, Short: "exit the session", ExecLevel: commandr.All}
 
@@ -29,75 +22,26 @@ func debugCmd(client commandr.Client, args *commandr.CommandArgs) (err error) {
     client.Write([]byte(color.GreenString("args.PealOff: %v\n", args.PealOff(1))))
     client.Write([]byte(color.GreenString("args.Debug: %v\n", args.Debug())))
     return
-}
+} // debugCmd
+
 func echoCmd(client commandr.Client, args *commandr.CommandArgs) (err error) {
     //text := args.PealOff(0)
     client.Write([]byte(color.GreenString("%v\n", args.PealOff(0))))
     return
-}
+} // echoCmd
 
 func exitCmd(client commandr.Client, args *commandr.CommandArgs) (err error) {
     client.Write([]byte(color.GreenString("Bye bye 👋\n")))
     client.Close()
     return
-}
-
-func tldrCmd(client commandr.Client, args *commandr.CommandArgs) (err error) {
-    err = args.Parse()
-    if err != nil {
-        return err
-    }
-
-    isLoading := true
-
-    commandr.AddText(client, "\n")
-    go func() {
-        // Cool terminal loading spinner
-
-        s := spin.New()
-
-        for {
-            if isLoading == false {
-                break
-            }
-
-            text := fmt.Sprintf("\r\033[36mLoading tldr\033[m %s ", s.Next())
-            commandr.AddText(client, text)
-            time.Sleep(100 * time.Millisecond)
-        }
-    }()
-
-    time.Sleep(1 * time.Second)
-    // Clear terminal line
-    commandr.AddText(client, "\033[2K\n")
-
-    isLoading = false
-
-    tldrName := ""
-
-    if len(args.Args) > 1 {
-        tldrName = args.Args[1]
-    }
-
-    if tldrName == "" {
-        commandr.Type(client, color.RedString("\nYou need a specify a tldr to lookup.\n"))
-        return
-    }
-
-    md := fmt.Sprintf("tldrName: %v\n", tldrName)
-    commandr.Type(client, md)
-    //    text := RenderMarkdownTerminal(md)
-    //
-    //AddText(stream, text)
-    return
-}
+} // exitCmd
 
 func adminLevelCmd(client commandr.Client, args *commandr.CommandArgs) (err error) {
     //text := args.PealOff(0)
     client.Write([]byte(color.GreenString("admintest\n")))
 
     return
-}
+} // adminLevelCmd
 
 func linesCmd(client commandr.Client, args *commandr.CommandArgs) (err error) {
 
@@ -116,4 +60,4 @@ func linesCmd(client commandr.Client, args *commandr.CommandArgs) (err error) {
         client.Write([]byte(color.GreenString("line[%d]\n", i)))
     }
     return
-}
+} // linesCmd

@@ -12,7 +12,7 @@ import (
 type Ui struct {
     u         *TuiClient
     r         *Repl
-    logViewer *LogViewer
+    LogViewer *LogViewer
 
     activeScreen tea.Model
 }
@@ -21,10 +21,10 @@ func NewUi(u *TuiClient) *Ui { // tea.Model
 
     i := &Ui{
         u:         u,
-        logViewer: NewLogViewer(),
+        LogViewer: NewLogViewer(),
         r:         NewRepl2(),
     }
-    i.activeScreen = i.logViewer
+    i.activeScreen = i.LogViewer
     i.r.InputHandler = func(line string) {
 
         u.AddReplContent(fmt.Sprintf("> %s\n", line))
@@ -83,12 +83,12 @@ func (m *Ui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
             if m.activeScreen == m.r {
                 loge.Info("switching active screen to LogViewer")
                 cmds = append(cmds, tea.EnterAltScreen)
-                m.activeScreen = m.logViewer
+                m.activeScreen = m.LogViewer
             }
 
             break
         case tea.KeyF2:
-            if m.activeScreen == m.logViewer {
+            if m.activeScreen == m.LogViewer {
                 loge.Info("switching active screen to repl")
                 cmds = append(cmds, tea.ExitAltScreen)
                 m.activeScreen = m.r
@@ -103,7 +103,7 @@ func (m *Ui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
     case tea.WindowSizeMsg:
         m.r.Update(msg)
-        m.logViewer.Update(msg)
+        m.LogViewer.Update(msg)
         break
     }
 
