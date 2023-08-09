@@ -28,23 +28,20 @@ export COMPILE_LDFLAGS=-s -X "main.BuildDate=${DATE}" \
                           -X "main.GitBranch=${BRANCH}"
 
 
-create_dir:
-	@mkdir -p $(BIN_DIR)
 
-check_prereq: create_dir
+
+
+check_prereq:
 
 build_info: check_prereq ## Build the container
 	@echo ''
 	@echo '---------------------------------------------------------'
-	@echo 'BUILT_ON_IP       $(BUILT_ON_IP)'
-	@echo 'BUILT_ON_OS       $(BUILT_ON_OS)'
 	@echo 'DATE              $(DATE)'
 	@echo 'LATEST_COMMIT     $(LATEST_COMMIT)'
 	@echo 'BRANCH            $(BRANCH)'
-	@echo 'COMMIT_CNT        $(COMMIT_CNT)'
-	@echo 'BUILD_NUMBER      $(BUILD_NUMBER)'
 	@echo 'COMPILE_LDFLAGS   $(COMPILE_LDFLAGS)'
 	@echo 'PATH              $(PATH)'
+	@echo 'TAG               $(TAG)'
 	@echo '---------------------------------------------------------'
 	@echo ''
 
