@@ -42,6 +42,7 @@ build_info: check_prereq ## Build the container
 	@echo 'COMPILE_LDFLAGS   $(COMPILE_LDFLAGS)'
 	@echo 'PATH              $(PATH)'
 	@echo 'TAG               $(TAG)'
+	@echo 'NEW_TAG           $(NEW_TAG)'	
 	@echo '---------------------------------------------------------'
 	@echo ''
 
