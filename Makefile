@@ -1,45 +1,32 @@
 -include .env
 export $(shell [ -f ".env" ] && sed 's/=.*//' .env)
 
-export BIN_DIR=./bin
-export DIST_DIR=./dist
-export PROJ_PATH=github.com/alexj212/bubblex
-export DOCKER_APP_NAME=bubblex
-
-
+export COMMIT_CNT := $(shell git rev-list --count HEAD 2> /dev/null)
 export DATE := $(shell date +%Y.%m.%d-%H%M)
-export BUILT_ON_IP := $(shell [ $$(uname) = Linux ] && hostname -i || hostname )
-export RUNTIME_VER := $(shell go version)
-export BUILT_ON_OS=$(shell uname -a)
-
 export LATEST_COMMIT := $(shell git rev-parse HEAD 2> /dev/null)
-export COMMIT_CNT := $(shell git rev-list --all 2> /dev/null | wc -l | sed 's/ //g' )
 export BRANCH := $(shell git branch  2> /dev/null |grep -v "no branch"| grep \*|cut -d ' ' -f2)
 export GIT_REPO := $(shell git config --get remote.origin.url  2> /dev/null)
 export COMMIT_DATE := $(shell git log -1 --format=%cd  2> /dev/null)
-
-export BUILT_BY := $(shell whoami  2> /dev/null)
-export VERSION=v0.0.3
-
+export VERSION_FILE   := version.txt
+export TAG     := $(shell [ -f "$(VERSION_FILE)" ] && cat "$(VERSION_FILE)" || echo '0.0.4')
+export VERMAJMIN      := $(subst ., ,$(TAG))
+export VERSION        := $(word 1,$(VERMAJMIN))
+export MAJOR          := $(word 2,$(VERMAJMIN))
+export MINOR          := $(word 3,$(VERMAJMIN))
+export NEW_MINOR      := $(shell expr "$(MINOR)" + 1)
+export NEW_TAG := $(VERSION).$(MAJOR).$(NEW_MINOR)
 
 ifeq ($(BRANCH),)
 BRANCH := master
 endif
 
-ifeq ($(COMMIT_CNT),)
-COMMIT_CNT := 0
-endif
-
-export BUILD_NUMBER := ${BRANCH}-${COMMIT_CNT}
-
 
 export COMPILE_LDFLAGS=-s -X "main.BuildDate=${DATE}" \
-                          -X "main.GitRepo=${GIT_REPO}" \
-                          -X "main.BuiltBy=${BUILT_BY}" \
-                          -X "main.CommitDate=${COMMIT_DATE}" \
                           -X "main.LatestCommit=${LATEST_COMMIT}" \
-                          -X "main.Branch=${BRANCH}" \
-						  -X "main.Version=${VERSION}"
+						  -X "main.Version=${NEW_TAG}"\
+						  -X "main.GitRepo=${GIT_REPO}" \
+                          -X "main.GitBranch=${BRANCH}"
+
 
 create_dir:
 	@mkdir -p $(BIN_DIR)
@@ -126,52 +113,11 @@ tools: ## install dependent tools for code analysis
 ####################################################################################################################
 
 
-build: palclient_linux## build binary
-
-
-build_gui: ## build gui
-	@echo "building ${BIN_NAME} ${VERSION}"
-	@echo "GOPATH=${GOPATH}"
-	cd ./frontend && yarn run build
-
-
-build_vroom: ## build vroom
-	@echo "building ${BIN_NAME} ${VERSION}"
-	@echo "GOPATH=${GOPATH}"
-	cd ./vroom && nuxt build
-
-
+build: ## build binary
+	go build ./...
 
 clean:
 	@test ! -e ./dist || rm -rf ./dist
-
-
-release: release_palclient
-
-release_palclient: palclient_linux palclient_osx palclient_windows
-	curl -ualexj:AP12k8ThDp6hvjw6 -T ./dist/osx/paltalk_client          "https://jfrog.theirweb.net/artifactory/misc/osx/paltalk_client"
-	curl -ualexj:AP12k8ThDp6hvjw6 -T ./dist/windows/paltalk_client.exe  "https://jfrog.theirweb.net/artifactory/misc/windows/paltalk_client.exe"
-	curl -ualexj:AP12k8ThDp6hvjw6 -T ./dist/linux/paltalk_client        "https://jfrog.theirweb.net/artifactory/misc/linux/paltalk_client"
-
-
-palclient: palclient_linux ## build distribution to ./dist/linux
-
-palclient_linux: build_info ## build distribution to ./dist/linux
-	@rm -rf ./dist/linux || true
-	@mkdir -p ./dist/linux
-	GOOS=linux GOARCH=amd64 go build -o ./dist/linux/paltalk_client -a -ldflags '$(COMPILE_LDFLAGS)' ./app
-
-palclient_osx: build_info ## build distribution to ./dist/linux
-	@rm -rf ./dist/osx || true
-	@mkdir -p ./dist/osx
-	GOOS=darwin GOARCH=amd64 go build -o ./dist/osx/paltalk_client -a -ldflags '$(COMPILE_LDFLAGS)' ./app
-
-
-palclient_windows: build_info ## build distribution to ./dist/linux
-	@rm -rf ./dist/windows || true
-	@mkdir -p ./dist/windows
-	GOOS=windows GOARCH=amd64 go build -o ./dist/windows/paltalk_client.exe -a -ldflags '$(COMPILE_LDFLAGS)' ./app
-
 
 all: build## build binaries
 
@@ -188,7 +134,5 @@ publish:
 
 
 upgrade:
-	go get -u gitlab.paltalk.com/go/utils/netutils
-	go get -u gitlab.paltalk.com/go/paltalk/palutils
 	go get -u ./...
 	go mod tidy

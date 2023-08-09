@@ -81,7 +81,7 @@ func main() {
 		logViewer.AppendEvent(program, 1, s+"AA / AAA"+result)
 	}
 
-	repl = bubblex.NewRepl(replIh)
+	repl = bubblex.NewRepl("repl", replIh)
 	logViewer = bubblex.NewLogViewer(logIh)
 
 	console = bubblex.NewUi(logViewer, repl)
