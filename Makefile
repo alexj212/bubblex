@@ -120,14 +120,20 @@ clean:
 all: build## build binaries
 
 
-publish:
+publish: ## tag & push to gitlab
+	@echo "\n\n\n\n\n\nRunning git add\n"
+	echo "$(NEW_TAG)" > "$(VERSION_FILE)"
 	git add -A
-	git commit -m "latest version: $(VERSION)"
-	git tag  "$(VERSION)"
-	git push origin "$(VERSION)"
-	git push
+	@echo "\n\n\n\n\n\nRunning git commit\n"
+	git commit -m "latest version: v$(NEW_TAG)"
 
+	@echo "\n\n\n\n\n\nRunning git tag\n"
+	git tag  "v$(NEW_TAG)"
 
+	@echo "\n\n\n\n\n\nRunning git push\n"
+	git push -f origin "v$(NEW_TAG)"
+
+	git push -f
 
 
 
