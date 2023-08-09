@@ -1,117 +1,77 @@
 package bubblex
 
 import (
-    "bufio"
-    "bytes"
-    "fmt"
-    "github.com/alexj212/gox/commandr"
-    tea "github.com/charmbracelet/bubbletea"
-    "github.com/potakhov/loge"
+	tea "github.com/charmbracelet/bubbletea"
 )
 
 type Ui struct {
-    u         *TuiClient
-    r         *Repl
-    LogViewer *LogViewer
-
-    activeScreen tea.Model
+	activeScreen int
+	screens      []tea.Model
 }
+var _ tea.Model = (*Ui)(nil)
+func NewUi(screens ...tea.Model) *Ui { // tea.Model
 
-func NewUi(u *TuiClient) *Ui { // tea.Model
+	i := &Ui{}
+	i.screens = make([]tea.Model, 0)
+	i.screens = append(i.screens, screens...)
 
-    i := &Ui{
-        u:         u,
-        LogViewer: NewLogViewer(),
-        r:         NewRepl2(),
-    }
-    i.activeScreen = i.LogViewer
-    i.r.InputHandler = func(line string) {
-
-        u.AddReplContent(fmt.Sprintf("> %s\n", line))
-
-        var b bytes.Buffer
-        s := bufio.NewWriter(&b)
-
-        parsed, err := commandr.NewCommandArgs(line, s)
-        if err != nil {
-            s.Flush()
-            u.AddReplContent(fmt.Sprintf("%s\n", b.String()))
-            u.AddReplContent(fmt.Sprintf("%v\n", err))
-            return
-        }
-
-        execErr := commandr.DefaultCommands.Execute(i.u, parsed)
-
-        if execErr != nil {
-            s.Flush()
-            u.AddReplContent(fmt.Sprintf("%s\n", b.String()))
-            u.AddReplContent(fmt.Sprintf("%v\n", err))
-            return
-        }
-
-        s.Flush()
-        u.AddReplContent(fmt.Sprintf("%s\n", string(b.Bytes())))
-
-        if u.user != nil {
-            u.user.history = append(u.user.history, line)
-        }
-
-        return
-    }
-    return i
+	i.activeScreen = 0
+	return i
 }
 
 func (m *Ui) Init() tea.Cmd {
-    return nil
+	return nil
 }
 
 func (m *Ui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-    var (
-        cmd  tea.Cmd
-        cmds []tea.Cmd
-    )
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
 
-    cmds = append(cmds, cmd)
+	cmds = append(cmds, cmd)
 
-    switch msg := msg.(type) {
+	switch msg := msg.(type) {
 
-    case tea.KeyMsg:
+	case tea.KeyMsg:
 
-        switch msg.Type {
-        case tea.KeyF1:
+		switch msg.Type {
+		case tea.KeyF1:
 
-            if m.activeScreen == m.r {
-                loge.Info("switching active screen to LogViewer")
-                cmds = append(cmds, tea.EnterAltScreen)
-                m.activeScreen = m.LogViewer
-            }
+			if m.activeScreen != 0 {
+				m.activeScreen = 0
+			}
 
-            break
-        case tea.KeyF2:
-            if m.activeScreen == m.LogViewer {
-                loge.Info("switching active screen to repl")
-                cmds = append(cmds, tea.ExitAltScreen)
-                m.activeScreen = m.r
-            }
+		case tea.KeyF2:
+			if m.activeScreen != 1 {
+				m.activeScreen = 1
+			}
 
-            break
-        case tea.KeyCtrlC, tea.KeyEscape:
-            cmds = append(cmds, tea.Quit)
-            break
-        }
-        break
+		case tea.KeyCtrlLeft:
+			m.activeScreen++
+			m.activeScreen = m.activeScreen % len(m.screens)
 
-    case tea.WindowSizeMsg:
-        m.r.Update(msg)
-        m.LogViewer.Update(msg)
-        break
-    }
+		case tea.KeyCtrlRight:
+			m.activeScreen--
+			if m.activeScreen < 0 {
+				m.activeScreen = len(m.screens) - 1
+			}
 
-    m.activeScreen.Update(msg)
+		case tea.KeyCtrlC, tea.KeyEscape:
+			cmds = append(cmds, tea.Quit)
+		}
 
-    return m, tea.Batch(cmds...)
+	case tea.WindowSizeMsg:
+		for _, screen := range m.screens {
+			screen.Update(msg)
+		}
+	}
+
+	m.screens[m.activeScreen%len(m.screens)].Update(msg)
+	return m, tea.Batch(cmds...)
 }
 
 func (m *Ui) View() string {
-    return m.activeScreen.View()
+	v := m.screens[m.activeScreen%len(m.screens)].View()
+	return v
 }
