@@ -17,7 +17,7 @@ require (
 	golang.org/x/crypto v0.12.0 // indirect
 )
 
-require github.com/alexj212/gox v0.2.10
+require github.com/alexj212/gox v0.2.12
 
 require (
 	github.com/MichaelMure/go-term-markdown v0.1.4 // indirect
