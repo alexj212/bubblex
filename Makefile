@@ -70,9 +70,11 @@ help: ## This help.
 
 
 test: ## run tests
+	@test ! -e ./.history || rm -rf ./.history
 	go test -v $(PROJ_PATH)
 
 fmt: ## run fmt on project
+	@test ! -e ./.history || rm -rf ./.history
 	#go fmt $(PROJ_PATH)/...
 	gofmt -s -d -w -l .
 

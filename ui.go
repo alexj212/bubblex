@@ -8,7 +8,9 @@ type Ui struct {
 	activeScreen int
 	screens      []tea.Model
 }
+
 var _ tea.Model = (*Ui)(nil)
+
 func NewUi(screens ...tea.Model) *Ui { // tea.Model
 
 	i := &Ui{}
@@ -67,7 +69,11 @@ func (m *Ui) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	m.screens[m.activeScreen%len(m.screens)].Update(msg)
+	_, cmd = m.screens[m.activeScreen%len(m.screens)].Update(msg)
+	if cmd != nil {
+		cmds = append(cmds, cmd)
+	}
+
 	return m, tea.Batch(cmds...)
 }
 
