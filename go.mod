@@ -11,8 +11,8 @@ require (
 	github.com/charmbracelet/lipgloss v0.9.1
 	github.com/evertras/bubble-table v0.15.6
 	github.com/fatih/color v1.16.0
-	github.com/knipferrc/teacup v0.3.1
 	github.com/mattn/go-runewidth v0.0.15
+	github.com/mistakenelf/teacup v0.4.1
 
 )
 

@@ -7,7 +7,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/evertras/bubble-table/table"
-	"github.com/knipferrc/teacup/statusbar"
+	"github.com/mistakenelf/teacup/statusbar"
 )
 
 const (
